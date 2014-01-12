@@ -1,2 +1,35 @@
 \chapter{Formalisation}  
+
+Afin de développer un systéme expert d'odre 0+, il nous faut pour celà une formalisation de la base de faits, de la base de régles et de la méthode d'inférence utilisée pour le parcours en largeur comme en profondeur.
+
  \section{Base de régles}
+
+Chaque régle est représentée par: Un identifiant, des premisses et des actions.
+
+\begin{lstlisting}
+( id
+	( ( premisse1) (premisse2) ...)
+	( ( action1) (action2) ...)
+)
+\end{lstlisting}
+
+Chaque prémisse étant constitué d'un opérateur de comparaison et de deux valeurs:
+
+\begin{lstlisting}
+( operateur valeur1 valeur2 valeur3 ...)
+\end{lstlisting}
+
+Exemple d'opérateur: =, <, >
+
+De même les actions sont définis par un opérateur et des valeurs:
+\begin{lstlisting}
+( operateur valeur1 valeur2 valeur3 ...)
+\end{lstlisting}
+
+Exemple d'opérateur: set, print-message, ask
+
+ \section{Base de faits}
+
+De façon beaucoup plus simple, chaque fait est représenté par
+
+<<voir code d'Antoine -- a faire>>
