@@ -31,7 +31,7 @@
 \captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
 
 \lstset{
-  basicstyle=\ttfamily\tiny
+  basicstyle=\ttfamily\small
 }
 
 \title{\textsc{\textbf{Rapport TP n°3 IA01 \\ Diagnostic de panne de service web}}}
@@ -62,20 +62,35 @@ Chaque règle est représentée par: Un identifiant, des prémisses et des actions.
 )
 \end{lstlisting}
 
+\begin{itermize}
+    \item id : Identifiant de la régle
+    \item premisses: Les différentes prémisses à tester avant de pouvoir vérifier la régle
+    \item actions: Les actions que l'on prend quand toutes les prémisses sont vérifiées
+\end{itemize}
+
 Chaque prémisse étant constitué d'un opérateur de comparaison et de deux valeurs:
 
 \begin{lstlisting}
-( operateur valeur1 valeur2 valeur3 ...)
+( operateur fait valeur ...)
 \end{lstlisting}
 
-Exemple d'opérateur: =, <, >
+\begin{itermize}
+    \item operateur : Opération tel que 'equal', 'is-known', 'is-unknown', ...
+    \item fait: Identifiant d'un fait que l'on peut trouver dans la base de fait, si il n'est pas trouvé, une questione est posée
+    \item valeur: Valeur de comparaison avec l'opération (optionnel)
+\end{itemize}
 
 De même les actions sont définis par un opérateur et des valeurs:
 \begin{lstlisting}
 ( action valeur1 valeur2 valeur3 ...)
 \end{lstlisting}
 
-Exemple d'action: set, print-message, ask
+Exemple d'action: (set ERREUR_NAVIGATEUR 503)
+
+\begin{itermize}
+    \item set : Permet de donner une valeur à un fait
+    \item ask : Permet de poser explicitement des questions
+\end{itemize}
 
  \section{Base de faits}
 
@@ -84,11 +99,19 @@ De façon beaucoup plus simple, chaque fait est représenté par:
 (idfait connu? valeur)
 \end{lstlisting}
 
-Ainsi que les questions à poser en cas de fait inconnu qui sont représentées par:
+\begin{itermize}
+    \item idfait : Identifiant unique permettant d'identifier le fait exemple: DEBUG, PROBLEME\_DNS, ...
+    \item connnu? : Permet de savoir si un fait est connu ou non
+    \item valeur: Valeur du fait, peut-être un nombre, une chaine de caractére ou un booléen
+\end{itemize}
+
+Ainsi que les questions à poser pour chaque fait:
 
 \begin{lstlisting}
 (idfait question)
 \end{lstlisting}
+
+Ainsi, lorsqu'un fait inconnu est necessaire, on fait appel à cette base de question.
 
 \chapter{Implémentation}
 
@@ -119,15 +142,23 @@ La base de questions sur les faits:
 (HEURES_DEPUIS_CHANGEMENT "De combien de temps date ce changement ?")
 (
 (RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?")
-(ACCES_PAR_IP_POSSIBLE "Si vous avez l'IP du service, pouvez-vous y acceder par adresse IP?")
-(SITE_COURANTS_ACCESSIBLES "Pouvez-vous accéder à vos sites courants tel que google.fr, apple.fr ou viedemerde.com ?")
-(PB_HEBERGEUR "Votre hebergeur à t-il reporté des problémes sur son infrastructure ?")
-(SERVEUR_APP "Quel serveur d'application utilisez vous ? Apache, NGinx, ...")
-(TECHNOLOGIE_APPLICATION "Qu'utilisez-vous pour votre service web ? PHP, Python, Ruby, Lisp, C#, Java, ...")
-(DROITS_FICHIERS "Vérifier les droits d'accès accordés aux fichiers et aux dossiers, sont-ils corrects ?
+(ACCES_PAR_IP_POSSIBLE "Si vous avez l'IP du service,
+    pouvez-vous y acceder par adresse IP?")
+(SITE_COURANTS_ACCESSIBLES "Pouvez-vous accéder à vos sites
+    courants tel que google.fr, apple.fr ou microsoft.com ?")
+(PB_HEBERGEUR "Votre hebergeur à t-il reporté des problémes
+    sur son infrastructure ?")
+(SERVEUR_APP "Quel serveur d'application utilisez vous ?
+    Apache, NGinx, ...")
+(TECHNOLOGIE_APPLICATION "Qu'utilisez-vous pour votre service web ?
+    PHP, Python, Ruby, Lisp, C#, Java, ...")
+(DROITS_FICHIERS "Vérifier les droits d'accès accordés aux
+    fichiers et aux dossiers, sont-ils corrects ?
 	(essayez 755, pour les rendre executables)")
-(HTACCESS "Désactivez le .htaccess pour savoir si le probléme viens de celui-ci, est-ce que celà fonctionne désormais ?")
-(DEBUG_ACTIF "Activez les options de debug, les voicis pour quelques languages / frameworks:
+(HTACCESS "Désactivez le .htaccess pour savoir si le probléme viens
+    de celui-ci, est-ce que celà fonctionne désormais ?")
+(DEBUG_ACTIF "Activez les options de debug, les voicis pour quelques
+    languages / frameworks:
 	_ PHP:
 ini_set('display_errors',1);
 ini_set('display_startup_errors',1);
@@ -141,21 +172,35 @@ DEBUG = True dans settings.py
 \section{Base de régles}
 
 \begin{lstlisting}[language=lisp]
-(create_rule '((= ERREUR_NAVIGATEUR ERREUR_DNS)) '((set PROBLEME_DNS "True")))
-(create_rule '((equal PROBLEME_DNS "True") (equal CHANGE_RECENT "True") (< HEURES_DEPUIS_CHANGEMENT 6)) '((solution "Probléme de propagation DNS")))
-(create_rule '((equal RENOUVELLEMENT_DNS "False")) '((solution "Probléme de renouvellement DNS")))
-(create_rule '((equal ACCES_PAR_IP_POSSIBLE "True")) '((solution "Autre probléme DNS")))
-(create_rule '((equal SITE_COURANTS_ACCESSIBLES "False")) '((ask-question RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?")))
-(create_rule '((= PROBLEME_DNS "True")) '((solution "Probléme venant de l'hébergeur de façon probable")))
-(create_rule '((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX)) '((solution "Probléme de configuration NGINX, verifiez vos logs")))
-(create_rule '((= ERREUR_NAVIGATEUR 500) (= TECHNOLOGIE_APPLICATION "PHP") (= DROITS_FICHIERS "Oui")) 
-	'((solution "Le probléme viens donc de droit de fichier incorrects")))
-(create_rule '((= ERREUR_NAVIGATEUR 500) (= TECHNOLOGIE_APPLICATION "PHP") (= HTACCESS "Oui")) 
+(create_rule '((= ERREUR_NAVIGATEUR ERREUR_DNS))
+    '((set PROBLEME_DNS "True")))
+(create_rule '((equal PROBLEME_DNS "True")
+    (equal CHANGE_RECENT "True") (< HEURES_DEPUIS_CHANGEMENT 6))
+        '((solution "Probléme de propagation DNS")))
+(create_rule '((equal RENOUVELLEMENT_DNS "False"))
+    '((solution "Probléme de renouvellement DNS")))
+(create_rule '((equal ACCES_PAR_IP_POSSIBLE "True"))
+    '((solution "Autre probléme DNS")))
+(create_rule '((equal SITE_COURANTS_ACCESSIBLES "False"))
+    '((ask-question RENOUVELLEMENT_DNS
+        "Avez-vous renouveler votre domaine ?")))
+(create_rule '((= PROBLEME_DNS "True"))
+    '((solution "Probléme venant de l'hébergeur de façon probable")))
+(create_rule '((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX))
+    '((solution "Probléme de configuration NGINX, verifiez vos logs")))
+(create_rule '((= ERREUR_NAVIGATEUR 500) 
+    (= TECHNOLOGIE_APPLICATION "PHP") (= DROITS_FICHIERS "Oui")) 
+   '((solution "Le probléme viens donc de droit de fichier incorrects")))
+(create_rule '((= ERREUR_NAVIGATEUR 500)
+    (= TECHNOLOGIE_APPLICATION "PHP") (= HTACCESS "Oui")) 
 	'((solution "Le probléme viens donc de votre .htaccess")))
 (create_rule '((= ERREUR_NAVIGATEUR 500) (= DEBUG_ACTIF "Oui")) 
-	'((solution "A partir de là, vous devriez désormais pouvoir trouver l'erreur qui à entrainer le probléme")))
-(create_rule '((= ERREUR_NAVIGATEUR 500)) '((solution "Celà semble être un probléme avec votre application web,
-	cependant nous ne savons pas exactement lequel, verifiez les logs de celle-ci pour en savoir plus")))
+	'((solution "A partir de là, vous devriez désormais pouvoir 
+        trouver l'erreur qui à entrainer le probléme")))
+(create_rule '((= ERREUR_NAVIGATEUR 500)) '((solution "Celà semble 
+    être un probléme avec votre application web,
+	cependant nous ne savons pas exactement lequel, 
+    verifiez les logs de celle-ci pour en savoir plus")))
 \end{lstlisting}
 
 \section{Moteur d'inférence}
@@ -164,14 +209,17 @@ DEBUG = True dans settings.py
 
 \begin{lstlisting}[language=lisp]
 (defun DFS_engine (facts rules &optional applied)
-	(let ((applicable_rules (search_candidates facts rules applied)) (back_facts facts))
-		(if (null applicable_rules) (setq applicable_rules (take_first *rules* applied)))
+	(let ((applicable_rules (search_candidates facts rules applied))
+                    (back_facts facts))
+		(if (null applicable_rules) (setq applicable_rules 
+                    (take_first *rules* applied)))
 		(when (not (null applicable_rules))
 			(dolist (rule_item applicable_rules)
 				(setq facts back_facts)
 				(dolist (action_item (get_actions rule_item))
 					(print action_item)
-					(if (execute_action action_item facts) T (return-from DFS_engine *solutions*))
+					(if (execute_action action_item facts) T 
+                            (return-from DFS_engine *solutions*))
 				)
 				(push rule_item applied)
 				(DFS_engine facts rules applied)
@@ -185,14 +233,17 @@ DEBUG = True dans settings.py
 
 \begin{lstlisting}[language=lisp]
 (defun DFS_engine (facts rules &optional applied)
-	(let ((applicable_rules (search_candidates facts rules applied)) (back_facts facts))
-		(if (null applicable_rules) (setq applicable_rules (take_first *rules* applied)))
+	(let ((applicable_rules (search_candidates facts rules applied))
+                    (back_facts facts))
+		(if (null applicable_rules) (setq applicable_rules 
+                    (take_first *rules* applied)))
 		(when (not (null applicable_rules))
 			(dolist (rule_item applicable_rules)
 				(setq facts back_facts)
 				(dolist (action_item (get_actions rule_item))
 					(print action_item)
-					(if (execute_action action_item facts) T (return-from DFS_engine *solutions*))
+					(if (execute_action action_item facts) T 
+                            (return-from DFS_engine *solutions*))
 				)
 				(push rule_item applied)
 				(DFS_engine facts rules applied)
@@ -235,20 +286,28 @@ DEBUG = True dans settings.py
 (dolist (premise premises)
 (cond 
 	((null facts) NIL)
-	((equal (car premise) 'is-known) (if (get_fact_value (in_fact? (cadr premise) facts) facts) T (return-from verify_prem NIL)))
-	((equal (car premise) 'is-unknown) (if (get_fact_value (in_fact? (cadr premise) facts) facts) (return-from verify_prem NIL) T))
+	((equal (car premise) 'is-known) (if (get_fact_value 
+        (in_fact? (cadr premise) facts) facts) T 
+            (return-from verify_prem NIL)))
+	((equal (car premise) 'is-unknown) (if (get_fact_value (in_fact? 
+        (cadr premise) facts) facts) (return-from verify_prem NIL) T))
 	(t  
-		(let ((val_fact_1 (get_fact_value (in_fact? (cadr premise) facts) facts)) (val_fact_2))
+		(let ((val_fact_1 (get_fact_value (in_fact? 
+            (cadr premise) facts) facts)) (val_fact_2))
 		(if val_fact_1 
-			(if (and (not (stringp (caddr premise))) (not (numberp (caddr premise)))) 
-				(progn
-					(setq val_fact_2 (get_fact_value (in_fact? (cadr premise) facts) facts))
-					(if val_fact_2
-						(if (apply (car premise) (list val_fact_1 val_fact_2)) T (return-from verify_prem NIL))
-						(return-from verify_prem NIL)
-					)
-				)
-				(if (apply (car premise) (list val_fact_1 (caddr premise))) T (return-from verify_prem NIL))
+			(if (and (not (stringp (caddr premise)))
+                (not (numberp (caddr premise)))) 
+            (progn
+                (setq val_fact_2 (get_fact_value 
+                    (in_fact? (cadr premise) facts) facts))
+                (if val_fact_2
+                    (if (apply (car premise)(list val_fact_1 val_fact_2))
+                        T (return-from verify_prem NIL))
+                    (return-from verify_prem NIL)
+                )
+            )
+            (if (apply (car premise) (list val_fact_1 (caddr premise)))
+                T (return-from verify_prem NIL))
 			)
 			(return-from verify_prem NIL)
 		)	
@@ -277,14 +336,17 @@ T
 ;;Algorithme d'execution des actions induites par l'application des règles
 (defun execute_action (action facts)
 (case (car action)
-(solution (print (cadr action)) (setq *solutions* (nconc *solutions* (list (cadr action))))
+(solution (print (cadr action)) (setq *solutions* 
+    (nconc *solutions* (list (cadr action))))
 	(print "Souhaitez-vous chercher d'autres solutions ? Y/N")
 	(setq answer (read))
-	(if (or (equal answer 'y) (equal answer 'Y)) T (return-from execute_action NIL))
+	(if (or (equal answer 'y) (equal answer 'Y))
+        T (return-from execute_action NIL))
 )
 (set 
 	(let ((id_fact (in_fact? (cadr action) facts)))
-		(if id_fact (set_value id_fact (caddr action)) (create_fact facts (cadr action) T (caddr action)))
+		(if id_fact (set_value id_fact (caddr action))
+            (create_fact facts (cadr action) T (caddr action)))
 	)
 	T	
 )
@@ -309,7 +371,8 @@ Quel type d'erreur ? Erreur DNS
 Pouvez-vous accéder à des sites courants tel que google.fr ou apple.com ? OUI
 Avez-vous changer les enregistrements DNS récemment ? OUI
 Il y a combien de temps ? 1h
-Celà semble être un probléme d'enregistrement DNS. Celà prend a plupart du temps plus de 4h à ce répandre sur le réseau.
+Celà semble être un probléme d'enregistrement DNS.
+Celà prend a plupart du temps plus de 4h à ce répandre sur le réseau.
 Souhaitez-vous chercher d'autres solutions ? N
 \end{lstlisting}
 
@@ -319,19 +382,6 @@ Connexion au site possible ? NON
 Affiche une erreur ? OUI
 Pouvez-vous accéder à des sites courants tel que google.fr ou apple.com ? NON
 Le probléme semble être dans votre connexion.
-Souhaitez-vous chercher d'autres solutions ? N
-\end{lstlisting}
-
-Probléme de configuration proxy NGINX
-\begin{lstlisting}
-Connexion au site possible ? OUI
-Affiche une erreur (site) ? OUI
-Quel type d'erreur (site) ? 502
-Est-ce que votre site utilise NGINX ? OUI
-Il y a plusieurs solutions possibles:
-* Nginx est en proxy avec Apache et Apache et injoignable (ou un autre serveur web)
-* Configuration du buffer et du timeout insuffisante, essayez ces réglages
-Est-ce que le serveur web derriére NGINX est bien démarré et fonctionnel (verifier les logs) ? OUI
 Souhaitez-vous chercher d'autres solutions ? N
 \end{lstlisting}
 
