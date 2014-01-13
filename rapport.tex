@@ -37,9 +37,11 @@
     \maketitle
     \tableofcontents
 
-\section*{Introduction}
+\chapter*{Introduction}
 
 Pour ce TP, nous avons décidé d'implémenter un système expert capable de trouver la cause et la solution à une panne d'un service web. Cela permet d'être dans un domaine dont les système experts se sont déjà avérés très utiles. Le sujet étant vaste et complexe, seul une petite partie à été formalisée dans la base de règle.
+
+Les connaisances exprimées ici se basent donc sur notre éxpérience en tant qu'administrateur de site internet et se déstine à d'autres administrateurs, plus débutant.
 
 Afin de développer ce système expert d'ordre 0+, il nous faut pour cela une formalisation de la base de faits, de la base de règles et de la méthode d'inférence utilisée pour le parcours en largeur comme en profondeur.
 
@@ -75,7 +77,9 @@ Exemple d'opérateur: set, print-message, ask
 
 De façon beaucoup plus simple, chaque fait est représenté par
 
-<<voir code d'Antoine -- a faire>>
+\begin{lstlisting}
+(idfait question)
+\end{lstlisting}
 
  \section{Fonctionnement du moteur}
 
@@ -101,13 +105,12 @@ L'inférence peut être faite en profondeur ou en largeur, en voici les algorithme
 \section{Base de régles}
 
 \begin{lstlisting}
-(
 (R1
 ( (= ERREUR_NAVIGATEUR "DNS"))
-( (set PROBLEME_DNS True))
+( (set PROBLEME_DNS "Oui"))
 )
 (R2
-((= PROBLEME_DNS True) (= CHANGE_RECENT "Oui") (< HEURES_DEPUIS_CHANGEMENT 6)
+((= PROBLEME_DNS Oui) (= CHANGE_RECENT "Oui") (< HEURES_DEPUIS_CHANGEMENT 6)
 ((solution "Probléme de propagation DNS"))
 )
 (R3
@@ -132,12 +135,63 @@ L'inférence peut être faite en profondeur ou en largeur, en voici les algorithme
 )
 (R7
 ((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX))
-((solution "Probléme de configuration NGINX"))
+((solution "Il y a plusieurs solutions possibles:
+* Nginx est en proxy avec Apache et Apache et injoignable (ou un autre serveur web)
+* Configuration du buffer et du timeout insuffisante, essayez ces réglages"))
 )
 (R8
 ((= ERREUR_NAVIGATEUR 500))
 ((solution "Probléme applicatif: activez le debug de votre application (PHP, Java, ...) et verifiez les logs du serveur"))
 )
 \end{lstlisting}
+
+\section{Moteur d'inférence}
+
+\begin{lstlisting}
+
+\end{lstlisting}
+
+\section{Fonctions de service}
+
+\begin{lstlisting}
+
+\end{lstlisting}
+
+\section{Exemple de fonctionnement}
+
+Probléme DNS
+\begin{lstlisting}
+Connexion au site possible ? NON
+Affiche une erreur ? OUI
+Quel type d’erreur ? Erreur DNS
+Pouvez-vous accéder à des sites courants tel que google.fr ou apple.com ? OUI
+Avez-vous changer les enregistrements DNS récemment ? OUI
+Il y a combien de temps ? 1h
+Celà semble être un probléme d’enregistrement DNS. Celà prend a plupart du temps plus de 4h à ce répandre sur le réseau.
+\end{lstlisting}
+
+Probléme réseau utilisateur
+\begin{lstlisting}
+Connexion au site possible ? NON
+Affiche une erreur ? OUI
+Pouvez-vous accéder à des sites courants tel que google.fr ou apple.com ? NON
+Le probléme semble être dans votre connexion.
+\end{lstlisting}
+
+Probléme de configuration proxy NGINX
+\begin{lstlisting}
+Connexion au site possible ? OUI
+Affiche une erreur (site) ? OUI
+Quel type d’erreur (site) ? 502
+Est-ce que votre site utilise NGINX ? OUI
+Il y a plusieurs solutions possibles:
+* Nginx est en proxy avec Apache et Apache et injoignable (ou un autre serveur web)
+* Configuration du buffer et du timeout insuffisante, essayez ces réglages
+Est-ce que le serveur web derriére NGINX est bien démarré et fonctionnel (verifier les logs) ? OUI
+\end{lstlisting}
+
+\chapter*{Conclusion}
+
+En conclusion, la partie la plus difficile de ce TP fut de choisir un sujet applicable aux systéme expert et dont nous avions assez de connaissances pour pouvoir en tirer des informations cohérentes.
 
 \end{document}

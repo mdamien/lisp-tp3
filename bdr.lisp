@@ -1,10 +1,9 @@
-(
 (R1
 ( (= ERREUR_NAVIGATEUR "DNS"))
-( (set PROBLEME_DNS True))
+( (set PROBLEME_DNS "Oui"))
 )
 (R2
-((= PROBLEME_DNS True) (= CHANGE_RECENT "Oui") (< HEURES_DEPUIS_CHANGEMENT 6)
+((= PROBLEME_DNS Oui) (= CHANGE_RECENT "Oui") (< HEURES_DEPUIS_CHANGEMENT 6)
 ((solution "Probléme de propagation DNS"))
 )
 (R3
@@ -29,7 +28,9 @@
 )
 (R7
 ((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX))
-((solution "Probléme de configuration NGINX"))
+((solution "Il y a plusieurs solutions possibles:
+* Nginx est en proxy avec Apache et Apache et injoignable (ou un autre serveur web)
+* Configuration du buffer et du timeout insuffisante, essayez ces réglages"))
 )
 (R8
 ((= ERREUR_NAVIGATEUR 500))
