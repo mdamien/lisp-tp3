@@ -235,7 +235,6 @@
 		((equal (car (symbol-value (car bfacts))) fact) (car bfacts))
 		(t (in_fact? fact (cdr bfacts)))
 	)
-
 )
 
 ;;Fonction qui créer un fait
@@ -256,9 +255,7 @@
 	)
 )
 
-;;Algorithme d'execution des actions induites par l'application des règles.
-;Ici on se retrouve avec un case tout pourri
-;
+;;Algorithme d'execution des actions induites par l'application des règles
 (defun execute_action (action facts)
 	(case (car action)
 		(solution (print (cadr action)) (setq *solutions* (nconc *solutions* (list (cadr action))))
@@ -280,20 +277,6 @@
 	T
 )
 
-
-
-
-
-
-(R5
-((equal SITE_COURANTS_ACCESSIBLES "False"))
-((ask-question RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?"))
-)
-(R6
-((= DNS_FAILED 650))
-((solution "Probléme hebergeur"))
-)
-
 ;Questions
 (
 (ERREUR_NAVIGATEUR "Quelle erreur est présente dans la navigateur ?")
@@ -304,7 +287,7 @@
 (ACCES_PAR_IP_POSSIBLE "Si vous avez l'IP du service, pouvez-vous y acceder par adresse IP?")
 (SITE_COURANTS_ACCESSIBLES "Pouvez-vous accéder à vos sites courants tel que google.fr, apple.fr ou viedemerde.com ?")
 (PB_HEBERGEUR "Votre hebergeur à t-il reporté des problémes sur son infrastructure ?")
-(SERVEUR_APP "Quel serveur d'application utilisé vous ? Apache, NGinx, ...")
+(SERVEUR_APP "Quel serveur d'application utilisez vous ? Apache, NGinx, ...")
 )
 
 
@@ -316,48 +299,6 @@
 (create_rule '((= DNS_FAILED 650)) '((solution "Probléme hebergeur")))
 (create_rule '((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX)) '((solution "Probléme de configuration NGINX")))
 (create_rule '((= ERREUR_NAVIGATEUR 500)) '((solution "Probléme applicatif")))
-
-
-
-(R2
-((equal PROBLEME_DNS "True") (equal CHANGE_RECENT "True") (< HEURES_DEPUIS_CHANGEMENT 6))
-((solution "Probléme de propagation DNS"))
-)
-(R3
-((equal RENOUVELLEMENT_DNS "False"))
-((solution "Probléme de renouvellement DNS"))
-)
-(R4
-((equal ACCES_PAR_IP_POSSIBLE "True"))
-((solution "Autre probléme DNS"))
-)
-(R5
-((equal SITE_COURANTS_ACCESSIBLES "False"))
-((ask-question RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?"))
-)
-(R6
-((= DNS_FAILED 650))
-((solution "Probléme hebergeur"))
-)
-(R7
-((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX))
-((solution "Probléme de configuration NGINX"))
-)
-(R8
-((= ERREUR_NAVIGATEUR 500))
-((solution "Probléme applicatif"))
-)
-)
-
-
-(R5
-((equal SITE_COURANTS_ACCESSIBLES "False"))
-((solution "Probléme général d'accés à Internet par le client"))
-)
-(R6
-((= STATUS_HEBERGEUR "Panne"))
-((solution "Probléme hebergeur"))
-)
 
 ;;Algorithme de la fonction de vérification de prémise
 ;(defun verify_prem (facts premise)

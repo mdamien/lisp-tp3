@@ -1,4 +1,4 @@
-\documentclass[a4paper, 12pt, leqno]{report}
+\documentclass[a4paper, 10pt, leqno]{report}
 
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
@@ -30,7 +30,11 @@
 \DeclareCaptionFormat{listing}{\colorbox{black}{\parbox{\textwidth}{#1#2#3}}}
 \captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
 
-\title{\textsc{\textbf{Rapport TP n°3 IA01}}}
+\lstset{
+  basicstyle=\ttfamily\tiny
+}
+
+\title{\textsc{\textbf{Rapport TP n°3 IA01 \\ Diagnostic de panne de service web}}}
 \author{\textbf{Damien MARI\'E et Antoine POUILLAUDE}}
 
 \begin{document}
@@ -85,7 +89,7 @@ De façon beaucoup plus simple, chaque fait est représenté par
 
 \section{Base de faits}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=lisp]
 (
 (ERREUR_NAVIGATEUR "Quelle erreur est présente dans la navigateur ?")
 (CHANGE_RECENT "Avez-vous récemment changer de DNS ?")
@@ -94,63 +98,181 @@ De façon beaucoup plus simple, chaque fait est représenté par
 (ACCES_PAR_IP_POSSIBLE "Si vous avez l'IP du service, pouvez-vous y acceder par adresse IP?")
 (SITE_COURANTS_ACCESSIBLES "Pouvez-vous accéder à vos sites courants tel que google.fr, apple.fr ou viedemerde.com ?")
 (PB_HEBERGEUR "Votre hebergeur à t-il reporté des problémes sur son infrastructure ?")
-(SERVEUR_APP "Quel serveur d'application utilisé vous ? Apache, NGinx, ...")
+(SERVEUR_APP "Quel serveur d'application utilisez vous ? Apache, NGinx, ...")
 )
 \end{lstlisting}
 
 \section{Base de régles}
 
-\begin{lstlisting}
-(R1
-( (= ERREUR_NAVIGATEUR "DNS"))
-( (set PROBLEME_DNS "Oui"))
-)
-(R2
-((= PROBLEME_DNS Oui) (= CHANGE_RECENT "Oui") (< HEURES_DEPUIS_CHANGEMENT 6)
-((solution "Probléme de propagation DNS"))
-)
-(R3
-((= RENOUVELLEMENT_DNS "Non"))
-((solution "Probléme de renouvellement DNS"))
-)
-(R4
-((= ACCES_PAR_IP_POSSIBLE "Oui"))
-((solution "Autre probléme DNS: Verifier que vous êtes bien connecté à un serveur DNS fonctionnel ou connectez vous sur un service externe"))
-)
-(R5
-((= SITE_COURANTS_ACCESSIBLES "Oui"))
-((solution "Probléme général d'accés à Internet par le client: Essayez de rétablir votre connexion internet"))
-)
-(R6
-((= PB_HEBERGEUR "Oui"))
-((solution "Celà viens surement de votre hébergeur, contactez le"))
-)
-(R6.5
-((= ERREUR_NAVIGATEUR 502))
-((solution "Regardez les logs de votre serveur"))
-)
-(R7
-((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX))
-((solution "Il y a plusieurs solutions possibles:
-* Nginx est en proxy avec Apache et Apache et injoignable (ou un autre serveur web)
-* Configuration du buffer et du timeout insuffisante, essayez ces réglages"))
-)
-(R8
-((= ERREUR_NAVIGATEUR 500))
-((solution "Probléme applicatif: activez le debug de votre application (PHP, Java, ...) et verifiez les logs du serveur"))
-)
+\begin{lstlisting}[language=lisp]
+(create_rule '((= ERREUR_NAVIGATEUR ERREUR_DNS)) '((set PROBLEME_DNS "True")))
+(create_rule '((equal PROBLEME_DNS "True") (equal CHANGE_RECENT "True") (< HEURES_DEPUIS_CHANGEMENT 6)) '((solution "Probléme de propagation DNS")))
+(create_rule '((equal RENOUVELLEMENT_DNS "False")) '((solution "Probléme de renouvellement DNS")))
+(create_rule '((equal ACCES_PAR_IP_POSSIBLE "True")) '((solution "Autre probléme DNS")))
+(create_rule '((equal SITE_COURANTS_ACCESSIBLES "False")) '((ask-question RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?")))
+(create_rule '((= DNS_FAILED 650)) '((solution "Probléme hebergeur")))
+(create_rule '((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX)) '((solution "Probléme de configuration NGINX")))
+(create_rule '((= ERREUR_NAVIGATEUR 500)) '((solution "Probléme applicatif")))
 \end{lstlisting}
 
 \section{Moteur d'inférence}
 
-\begin{lstlisting}
+\subsection{Parcours en profondeur}
 
+\begin{lstlisting}[language=lisp]
+(defun DFS_engine (facts rules &optional applied)
+	(let ((applicable_rules (search_candidates facts rules applied)) (back_facts facts))
+		(if (null applicable_rules) (setq applicable_rules (take_first *rules* applied)))
+		(when (not (null applicable_rules))
+			(dolist (rule_item applicable_rules)
+				(setq facts back_facts)
+				(dolist (action_item (get_actions rule_item))
+					(print action_item)
+					(if (execute_action action_item facts) T (return-from DFS_engine *solutions*))
+				)
+				(push rule_item applied)
+				(DFS_engine facts rules applied)
+			)
+		)
+	)
+)
 \end{lstlisting}
 
 \section{Fonctions de service}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=lisp]
+;;Algorithme de recherche de règles candidates
+(defun search_candidates (facts rules applied &optional out)
+(cond
+((null rules) (return-from search_candidates out))
+(t
+	(let ((flag T)(studied_rule (car rules)))
+		(when (not (member studied_rule applied))
+			(let ((premises_studied_rule (get_premises studied_rule)))
+				(dolist (premise premises_studied_rule)
+					(when (not (verify_prem facts premises_studied_rule))
+						(setq flag NIL)
+						(return)
+					)
+				)
+				(if flag (setq out (nconc out (list studied_rule))))
+			)
+		)
+	)
+	(search_candidates facts (cdr rules) applied out)
+)
+)
+)
+\end{lstlisting}
 
+\begin{lstlisting}[language=lisp]
+;;Algorithme de la fonction de vérification de premises
+(defun verify_prem (facts premises)
+(dolist (premise premises)
+(cond 
+	((null facts) NIL)
+	((equal (car premise) 'is-known) (if (get_fact_value (in_fact? (cadr premise) facts) facts) T (return-from verify_prem NIL)))
+	((equal (car premise) 'is-unknown) (if (get_fact_value (in_fact? (cadr premise) facts) facts) (return-from verify_prem NIL) T))
+	(t  
+		(let ((val_fact_1 (get_fact_value (in_fact? (cadr premise) facts) facts)) (val_fact_2))
+		(if val_fact_1 
+			(if (and (not (stringp (caddr premise))) (not (numberp (caddr premise)))) 
+				(progn
+					(setq val_fact_2 (get_fact_value (in_fact? (cadr premise) facts) facts))
+					(if val_fact_2
+						(if (apply (car premise) (list val_fact_1 val_fact_2)) T (return-from verify_prem NIL))
+						(return-from verify_prem NIL)
+					)
+				)
+				(if (apply (car premise) (list val_fact_1 (caddr premise))) T (return-from verify_prem NIL))
+			)
+			(return-from verify_prem NIL)
+		)	
+		)
+	)
+)
+)
+T	
+)
+\end{lstlisting}
+
+\begin{lstlisting}[language=lisp]
+;;Fonction qui pose une question
+(defun ask_question (fact bfacts question)
+	(print question)
+	(let ((answer (read))(id_fact (in_fact? fact bfacts)))
+		;La ligne du dessous sert à mettre en string si nécessaire
+		(if (not (numberp answer)) (setq answer (string answer)))
+		(cond
+		 	(id_fact 
+				(setf (cadr (get_fact id_fact bfacts)) T)
+				(setf (caddr (get_fact id_fact bfacts)) answer)
+				(symbol-value id_fact)
+			)
+			(t 
+				(create_fact fact t answer)
+			)		
+		)
+	)
+)
+\end{lstlisting}
+
+\begin{lstlisting}[language=lisp]
+;;Fonction qui cherche un fait dans la base de faits
+(defun in_fact? (fact bfacts)
+	(cond
+		((null bfacts) NIL)
+		((equal (car (symbol-value (car bfacts))) fact) (car bfacts))
+		(t (in_fact? fact (cdr bfacts)))
+	)
+)
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=lisp]
+;;Fonction qui crée un fait
+(defun create_fact (fact &optional known? value)
+	(let ((id_fact (gentemp "F")))
+		(set id_fact (list fact known? value))
+		(setq *facts* (nconc *facts* (list id_fact)))
+		id_fact
+	)
+)
+\end{lstlisting}
+
+\begin{lstlisting}[language=lisp]
+;;Fonction qui crée les règles
+(defun create_rule (premise induction)
+	(let ((id_rule (gentemp "R")))
+		(set id_rule (list id_rule premise induction))
+		(setq *rules* (nconc *rules* (list id_rule)))
+		id_rule
+	)
+)
+\end{lstlisting}
+
+\begin{lstlisting}[language=lisp]
+;;Algorithme d'execution des actions induites par l'application des règles
+(defun execute_action (action facts)
+(case (car action)
+(solution (print (cadr action)) (setq *solutions* (nconc *solutions* (list (cadr action))))
+	(print "Souhaitez-vous chercher d'autres solutions ? Y/N")
+	(setq answer (read))
+	(if (or (equal answer 'y) (equal answer 'Y)) T (return-from execute_action NIL))
+)
+(set 
+	(let ((id_fact (in_fact? (cadr action) facts)))
+		(if id_fact (set_value id_fact (caddr action)) (create_fact facts (cadr action) T (caddr action)))
+	)
+	T	
+)
+(ask-question 
+	(ask_question (cadr action) facts (caddr action))
+	T
+)
+)
+T
+)
 \end{lstlisting}
 
 \section{Exemple de fonctionnement}
@@ -159,11 +281,12 @@ Probléme DNS
 \begin{lstlisting}
 Connexion au site possible ? NON
 Affiche une erreur ? OUI
-Quel type d’erreur ? Erreur DNS
+Quel type d'erreur ? Erreur DNS
 Pouvez-vous accéder à des sites courants tel que google.fr ou apple.com ? OUI
 Avez-vous changer les enregistrements DNS récemment ? OUI
 Il y a combien de temps ? 1h
-Celà semble être un probléme d’enregistrement DNS. Celà prend a plupart du temps plus de 4h à ce répandre sur le réseau.
+Celà semble être un probléme d'enregistrement DNS. Celà prend a plupart du temps plus de 4h à ce répandre sur le réseau.
+Souhaitez-vous chercher d'autres solutions ? N
 \end{lstlisting}
 
 Probléme réseau utilisateur
@@ -172,22 +295,24 @@ Connexion au site possible ? NON
 Affiche une erreur ? OUI
 Pouvez-vous accéder à des sites courants tel que google.fr ou apple.com ? NON
 Le probléme semble être dans votre connexion.
+Souhaitez-vous chercher d'autres solutions ? N
 \end{lstlisting}
 
 Probléme de configuration proxy NGINX
 \begin{lstlisting}
 Connexion au site possible ? OUI
 Affiche une erreur (site) ? OUI
-Quel type d’erreur (site) ? 502
+Quel type d'erreur (site) ? 502
 Est-ce que votre site utilise NGINX ? OUI
 Il y a plusieurs solutions possibles:
 * Nginx est en proxy avec Apache et Apache et injoignable (ou un autre serveur web)
 * Configuration du buffer et du timeout insuffisante, essayez ces réglages
 Est-ce que le serveur web derriére NGINX est bien démarré et fonctionnel (verifier les logs) ? OUI
+Souhaitez-vous chercher d'autres solutions ? N
 \end{lstlisting}
 
 \chapter*{Conclusion}
 
-En conclusion, la partie la plus difficile de ce TP fut de choisir un sujet applicable aux systéme expert et dont nous avions assez de connaissances pour pouvoir en tirer des informations cohérentes.
+En conclusion, la partie la plus difficile de ce TP fut de choisir un sujet applicable aux systéme expert et dont nous avions assez de connaissances pour pouvoir en tirer des informations cohérentes. 
 
 \end{document}
