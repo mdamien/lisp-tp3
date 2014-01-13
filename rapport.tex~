@@ -2,7 +2,7 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8x]{inputenc}
-\usepackage[french]{babel}
+\usepackage[greek,french]{babel}
 \usepackage[babel=true]{csquotes}
 \usepackage[top=1.5cm, bottom=2.0cm, left=2.0cm, right=2.0cm]{geometry}
 \usepackage{fancyhdr}
