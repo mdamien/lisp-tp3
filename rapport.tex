@@ -1,8 +1,8 @@
 \documentclass[a4paper, 12pt, leqno]{report}
 
 \usepackage[T1]{fontenc}
-\usepackage[utf8x]{inputenc}
 \usepackage[french]{babel}
+\usepackage[latin1]{inputenc}
 \usepackage[babel=true]{csquotes}
 \usepackage[top=1.5cm, bottom=2.0cm, left=2.0cm, right=2.0cm]{geometry}
 \usepackage{fancyhdr}
@@ -30,7 +30,7 @@
 \DeclareCaptionFormat{listing}{\colorbox{black}{\parbox{\textwidth}{#1#2#3}}}
 \captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
 
-\title{\textsc{\textbf{Rapport TP nÂ°3 IA01}}}
+\title{\textsc{\textbf{Rapport TP n°3 IA01}}}
 \author{\textbf{Damien MARI\'E et Antoine POUILLAUDE}}
 
 \begin{document}
@@ -39,15 +39,15 @@
 
 \section*{Introduction}
 
-Pour ce TP, nous avons dÃ©cidÃ© d'implÃ©menter un systÃ¨me expert capable de trouver la cause et la solution Ã  une panne d'un service web. Cela permet d'Ãªtre dans un domaine dont les systÃ¨me experts se sont dÃ©jÃ  avÃ©rÃ©s trÃ¨s utiles. Le sujet Ã©tant vaste et complexe, seul une petite partie Ã  Ã©tÃ© formalisÃ©e dans la base de rÃ¨gle.
+Pour ce TP, nous avons décidé d'implémenter un système expert capable de trouver la cause et la solution à une panne d'un service web. Cela permet d'être dans un domaine dont les système experts se sont déjà avérés très utiles. Le sujet étant vaste et complexe, seul une petite partie à été formalisée dans la base de règle.
 
-Afin de dÃ©velopper ce systÃ¨me expert d'ordre 0+, il nous faut pour cela une formalisation de la base de faits, de la base de rÃ¨gles et de la mÃ©thode d'infÃ©rence utilisÃ©e pour le parcours en largeur comme en profondeur.
+Afin de développer ce système expert d'ordre 0+, il nous faut pour cela une formalisation de la base de faits, de la base de règles et de la méthode d'inférence utilisée pour le parcours en largeur comme en profondeur.
 
 \chapter{Formalisation}
 
-\section{Base de rÃ¨gles}
+\section{Base de règles}
 
-Chaque rÃ¨gle est reprÃ©sentÃ©e par: Un identifiant, des prÃ©misses et des actions.
+Chaque règle est représentée par: Un identifiant, des prémisses et des actions.
 
 \begin{lstlisting}
 ( id
@@ -56,49 +56,49 @@ Chaque rÃ¨gle est reprÃ©sentÃ©e par: Un identifiant, des prÃ©misses et des actio
 )
 \end{lstlisting}
 
-Chaque prÃ©misse Ã©tant constituÃ© d'un opÃ©rateur de comparaison et de deux valeurs:
+Chaque prémisse étant constitué d'un opérateur de comparaison et de deux valeurs:
 
 \begin{lstlisting}
 ( operateur valeur1 valeur2 valeur3 ...)
 \end{lstlisting}
 
-Exemple d'opÃ©rateur: =, <, >
+Exemple d'opérateur: =, <, >
 
-De mÃªme les actions sont dÃ©finis par un opÃ©rateur et des valeurs:
+De même les actions sont définis par un opérateur et des valeurs:
 \begin{lstlisting}
-( opÃ©rateur valeur1 valeur2 valeur3 ...)
+( operateur valeur1 valeur2 valeur3 ...)
 \end{lstlisting}
 
-Exemple d'opÃ©rateur: set, print-message, ask
+Exemple d'opérateur: set, print-message, ask
 
  \section{Base de faits}
 
-De faÃ§on beaucoup plus simple, chaque fait est reprÃ©sentÃ© par
+De façon beaucoup plus simple, chaque fait est représenté par
 
 <<voir code d'Antoine -- a faire>>
 
  \section{Fonctionnement du moteur}
 
-L'infÃ©rence peut Ãªtre faite en profondeur ou en largeur, en voici les algorithme simplifiÃ©s
+L'inférence peut être faite en profondeur ou en largeur, en voici les algorithme simplifiés
 
-\chapter{ImplÃ©mentation}
+\chapter{Implémentation}
 
 \section{Base de faits}
 
 \begin{lstlisting}
 (
-(ERREUR_NAVIGATEUR "Quelle erreur est prÃ©sente dans la navigateur ?")
-(CHANGE_RECENT "Avez-vous rÃ©cemment changer de DNS ?")
+(ERREUR_NAVIGATEUR "Quelle erreur est présente dans la navigateur ?")
+(CHANGE_RECENT "Avez-vous récemment changer de DNS ?")
 (HEURES_DEPUIS_CHANGEMENT "De combien de temps date ce changement ?")
 (RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?")
 (ACCES_PAR_IP_POSSIBLE "Si vous avez l'IP du service, pouvez-vous y acceder par adresse IP?")
-(SITE_COURANTS_ACCESSIBLES "Pouvez-vous accÃ©der Ã  vos sites courants tel que google.fr, apple.fr ou viedemerde.com ?")
-(PB_HEBERGEUR "Votre hebergeur Ã  t-il reportÃ© des problÃ©mes sur son infrastructure ?")
-(SERVEUR_APP "Quel serveur d'application utilisÃ© vous ? Apache, NGinx, ...")
+(SITE_COURANTS_ACCESSIBLES "Pouvez-vous accéder à vos sites courants tel que google.fr, apple.fr ou viedemerde.com ?")
+(PB_HEBERGEUR "Votre hebergeur à t-il reporté des problémes sur son infrastructure ?")
+(SERVEUR_APP "Quel serveur d'application utilisé vous ? Apache, NGinx, ...")
 )
 \end{lstlisting}
 
-\section{Base de rÃ©gles}
+\section{Base de régles}
 
 \begin{lstlisting}
 (
@@ -108,23 +108,23 @@ L'infÃ©rence peut Ãªtre faite en profondeur ou en largeur, en voici les algorith
 )
 (R2
 ((= PROBLEME_DNS True) (= CHANGE_RECENT "Oui") (< HEURES_DEPUIS_CHANGEMENT 6)
-((solution "ProblÃ©me de propagation DNS"))
+((solution "Probléme de propagation DNS"))
 )
 (R3
 ((= RENOUVELLEMENT_DNS "Non"))
-((solution "ProblÃ©me de renouvellement DNS"))
+((solution "Probléme de renouvellement DNS"))
 )
 (R4
 ((= ACCES_PAR_IP_POSSIBLE "Oui"))
-((solution "Autre problÃ©me DNS: Verifier que vous Ãªtes bien connectÃ© Ã  un serveur DNS fonctionnel ou connectez vous sur un service externe"))
+((solution "Autre probléme DNS: Verifier que vous êtes bien connecté à un serveur DNS fonctionnel ou connectez vous sur un service externe"))
 )
 (R5
 ((= SITE_COURANTS_ACCESSIBLES "Oui"))
-((solution "ProblÃ©me gÃ©nÃ©ral d'accÃ©s Ã  Internet par le client: Essayez de rÃ©tablir votre connexion internet"))
+((solution "Probléme général d'accés à Internet par le client: Essayez de rétablir votre connexion internet"))
 )
 (R6
 ((= PB_HEBERGEUR "Oui"))
-((solution "CelÃ  viens surement de votre hÃ©bergeur, contactez le"))
+((solution "Celà viens surement de votre hébergeur, contactez le"))
 )
 (R6.5
 ((= ERREUR_NAVIGATEUR 502))
@@ -132,11 +132,11 @@ L'infÃ©rence peut Ãªtre faite en profondeur ou en largeur, en voici les algorith
 )
 (R7
 ((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX))
-((solution "ProblÃ©me de configuration NGINX"))
+((solution "Probléme de configuration NGINX"))
 )
 (R8
 ((= ERREUR_NAVIGATEUR 500))
-((solution "ProblÃ©me applicatif: activez le debug de votre application (PHP, Java, ...) et verifiez les logs du serveur"))
+((solution "Probléme applicatif: activez le debug de votre application (PHP, Java, ...) et verifiez les logs du serveur"))
 )
 \end{lstlisting}
 
