@@ -288,6 +288,18 @@
 (SITE_COURANTS_ACCESSIBLES "Pouvez-vous accéder à vos sites courants tel que google.fr, apple.fr ou viedemerde.com ?")
 (PB_HEBERGEUR "Votre hebergeur à t-il reporté des problémes sur son infrastructure ?")
 (SERVEUR_APP "Quel serveur d'application utilisez vous ? Apache, NGinx, ...")
+(TECHNOLOGIE_APPLICATION "Qu'utilisez-vous pour votre service web ? PHP, Python, Ruby, Lisp, C#, Java, ...")
+(DROITS_FICHIERS "Vérifier les droits d'accès accordés aux fichiers et aux dossiers, sont-ils corrects ?
+	(essayez 755, pour les rendre executables)")
+(HTACCESS "Désactivez le .htaccess pour savoir si le probléme viens de celui-ci, est-ce que celà fonctionne désormais ?")
+(DEBUG_ACTIF "Activez les options de debug, les voicis pour quelques languages / frameworks:
+	_ PHP:
+ini_set('display_errors',1);
+ini_set('display_startup_errors',1);
+error_reporting(-1); 
+	_ Django:
+DEBUG = True dans settings.py
+	Est-ce que vous pouvez voir l'erreur plus clairement ?")
 )
 
 
@@ -296,9 +308,17 @@
 (create_rule '((equal RENOUVELLEMENT_DNS "False")) '((solution "Probléme de renouvellement DNS")))
 (create_rule '((equal ACCES_PAR_IP_POSSIBLE "True")) '((solution "Autre probléme DNS")))
 (create_rule '((equal SITE_COURANTS_ACCESSIBLES "False")) '((ask-question RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?")))
-(create_rule '((= DNS_FAILED 650)) '((solution "Probléme hebergeur")))
-(create_rule '((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX)) '((solution "Probléme de configuration NGINX")))
-(create_rule '((= ERREUR_NAVIGATEUR 500)) '((solution "Probléme applicatif")))
+(create_rule '((= PROBLEME_DNS "True")) '((solution "Probléme venant de l'hébergeur de façon probable")))
+(create_rule '((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX)) '((solution "Probléme de configuration NGINX, verifiez vos logs")))
+(create_rule '((= ERREUR_NAVIGATEUR 500) (= TECHNOLOGIE_APPLICATION "PHP") (= DROITS_FICHIERS "Oui")) 
+	'((solution "Le probléme viens donc de droit de fichier incorrects")))
+(create_rule '((= ERREUR_NAVIGATEUR 500) (= TECHNOLOGIE_APPLICATION "PHP") (= HTACCESS "Oui")) 
+	'((solution "Le probléme viens donc de votre .htaccess")))
+(create_rule '((= ERREUR_NAVIGATEUR 500) (= DEBUG_ACTIF "Oui")) 
+	'((solution "A partir de là, vous devriez désormais pouvoir trouver l'erreur qui à entrainer le probléme")))
+(create_rule '((= ERREUR_NAVIGATEUR 500)) '((solution "Celà semble être un probléme avec votre application web,
+	cependant nous ne savons pas exactement lequel, verifiez les logs de celle-ci pour en savoir plus")))
+
 
 ;;Algorithme de la fonction de vérification de prémise
 ;(defun verify_prem (facts premise)
