@@ -34,7 +34,7 @@
   basicstyle=\ttfamily\tiny
 }
 
-\title{\textsc{\textbf{Rapport TP n°3 IA01 \\ Diagnostic de panne de service web}}}
+\title{\textsc{\textbf{Rapport TP nÂ°3 IA01 \\Â Diagnostic de panne de service web}}}
 \author{\textbf{Damien MARI\'E et Antoine POUILLAUDE}}
 
 \begin{document}
@@ -43,17 +43,17 @@
 
 \chapter*{Introduction}
 
-Pour ce TP, nous avons décidé d'implémenter un système expert capable de trouver la cause et la solution à une panne d'un service web. Cela permet d'être dans un domaine dont les système experts se sont déjà avérés très utiles. Le sujet étant vaste et complexe, seul une petite partie à été formalisée dans la base de règle.
+Pour ce TP, nous avons dÃ©cidÃ© d'implÃ©menter un systÃ¨me expert capable de trouver la cause et la solution Ã  une panne d'un service web. Cela permet d'Ãªtre dans un domaine dont les systÃ¨me experts se sont dÃ©jÃ  avÃ©rÃ©s trÃ¨s utiles. Le sujet Ã©tant vaste et complexe, seul une petite partie Ã  Ã©tÃ© formalisÃ©e dans la base de rÃ¨gle.
 
-Les connaisances exprimées ici se basent donc sur notre éxpérience en tant qu'administrateur de site internet et se déstine à d'autres administrateurs, plus débutant.
+Les connaisances exprimÃ©es ici se basent donc sur notre Ã©xpÃ©rience en tant qu'administrateur de site internet et se dÃ©stine Ã  d'autres administrateurs, plus dÃ©butant.
 
-Afin de développer ce système expert d'ordre 0+, il nous faut pour cela une formalisation de la base de faits, de la base de règles et de la méthode d'inférence utilisée pour le parcours en largeur comme en profondeur.
+Afin de dÃ©velopper ce systÃ¨me expert d'ordre 0+, il nous faut pour cela une formalisation de la base de faits, de la base de rÃ¨gles et de la mÃ©thode d'infÃ©rence utilisÃ©e pour le parcours en largeur comme en profondeur.
 
 \chapter{Formalisation}
 
-\section{Base de règles}
+\section{Base de rÃ¨gles}
 
-Chaque règle est représentée par: Un identifiant, des prémisses et des actions.
+Chaque rÃ¨gle est reprÃ©sentÃ©e par: Un identifiant, des prÃ©misses et des actions.
 
 \begin{lstlisting}
 ( id
@@ -62,15 +62,15 @@ Chaque règle est représentée par: Un identifiant, des prémisses et des actions.
 )
 \end{lstlisting}
 
-Chaque prémisse étant constitué d'un opérateur de comparaison et de deux valeurs:
+Chaque prÃ©misse Ã©tant constituÃ© d'un opÃ©rateur de comparaison et de deux valeurs:
 
 \begin{lstlisting}
 ( operateur valeur1 valeur2 valeur3 ...)
 \end{lstlisting}
 
-Exemple d'opérateur: =, <, >
+Exemple d'opÃ©rateur: =, <, >
 
-De même les actions sont définis par un opérateur et des valeurs:
+De mÃªme les actions sont dÃ©finis par un opÃ©rateur et des valeurs:
 \begin{lstlisting}
 ( action valeur1 valeur2 valeur3 ...)
 \end{lstlisting}
@@ -79,22 +79,22 @@ Exemple d'action: set, print-message, ask
 
  \section{Base de faits}
 
-De façon beaucoup plus simple, chaque fait est représenté par:
+De faÃ§on beaucoup plus simple, chaque fait est reprÃ©sentÃ© par:
 \begin{lstlisting}
 (idfait connu? valeur)
 \end{lstlisting}
 
-Ainsi que les questions à poser en cas de fait inconnu qui sont représentées par:
+Ainsi que les questions Ã  poser en cas de fait inconnu qui sont reprÃ©sentÃ©es par:
 
 \begin{lstlisting}
 (idfait question)
 \end{lstlisting}
 
-\chapter{Implémentation}
+\chapter{ImplÃ©mentation}
 
 \section{Base de faits}
 
-La base de fait n'est pas déclarée explicitement, elle se construit au fur et à mesure:
+La base de fait n'est pas dÃ©clarÃ©e explicitement, elle se construit au fur et Ã  mesure:
 
 \begin{itemize}
   \item ERREUR\_NAVIGATEUR: 404, 503, 200, 500, \ldots
@@ -114,19 +114,19 @@ La base de questions sur les faits:
 
 \begin{lstlisting}
 (
-(ERREUR_NAVIGATEUR "Quelle erreur est présente dans la navigateur ?")
-(CHANGE_RECENT "Avez-vous récemment changer de DNS ?")
+(ERREUR_NAVIGATEUR "Quelle erreur est prÃ©sente dans la navigateur ?")
+(CHANGE_RECENT "Avez-vous rÃ©cemment changer de DNS ?")
 (HEURES_DEPUIS_CHANGEMENT "De combien de temps date ce changement ?")
 (
 (RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?")
 (ACCES_PAR_IP_POSSIBLE "Si vous avez l'IP du service, pouvez-vous y acceder par adresse IP?")
-(SITE_COURANTS_ACCESSIBLES "Pouvez-vous accéder à vos sites courants tel que google.fr, apple.fr ou viedemerde.com ?")
-(PB_HEBERGEUR "Votre hebergeur à t-il reporté des problémes sur son infrastructure ?")
+(SITE_COURANTS_ACCESSIBLES "Pouvez-vous accÃ©der Ã  vos sites courants tel que google.fr, apple.fr ou viedemerde.com ?")
+(PB_HEBERGEUR "Votre hebergeur Ã  t-il reportÃ© des problÃ©mes sur son infrastructure ?")
 (SERVEUR_APP "Quel serveur d'application utilisez vous ? Apache, NGinx, ...")
 (TECHNOLOGIE_APPLICATION "Qu'utilisez-vous pour votre service web ? PHP, Python, Ruby, Lisp, C#, Java, ...")
-(DROITS_FICHIERS "Vérifier les droits d'accès accordés aux fichiers et aux dossiers, sont-ils corrects ?
+(DROITS_FICHIERS "VÃ©rifier les droits d'accÃ¨s accordÃ©s aux fichiers et aux dossiers, sont-ils corrects ?
 	(essayez 755, pour les rendre executables)")
-(HTACCESS "Désactivez le .htaccess pour savoir si le probléme viens de celui-ci, est-ce que celà fonctionne désormais ?")
+(HTACCESS "DÃ©sactivez le .htaccess pour savoir si le problÃ©me viens de celui-ci, est-ce que celÃ  fonctionne dÃ©sormais ?")
 (DEBUG_ACTIF "Activez les options de debug, les voicis pour quelques languages / frameworks:
 	_ PHP:
 ini_set('display_errors',1);
@@ -138,27 +138,27 @@ DEBUG = True dans settings.py
 )
 \end{lstlisting}
 
-\section{Base de régles}
+\section{Base de rÃ©gles}
 
 \begin{lstlisting}[language=lisp]
 (create_rule '((= ERREUR_NAVIGATEUR ERREUR_DNS)) '((set PROBLEME_DNS "True")))
-(create_rule '((equal PROBLEME_DNS "True") (equal CHANGE_RECENT "True") (< HEURES_DEPUIS_CHANGEMENT 6)) '((solution "Probléme de propagation DNS")))
-(create_rule '((equal RENOUVELLEMENT_DNS "False")) '((solution "Probléme de renouvellement DNS")))
-(create_rule '((equal ACCES_PAR_IP_POSSIBLE "True")) '((solution "Autre probléme DNS")))
+(create_rule '((equal PROBLEME_DNS "True") (equal CHANGE_RECENT "True") (< HEURES_DEPUIS_CHANGEMENT 6)) '((solution "ProblÃ©me de propagation DNS")))
+(create_rule '((equal RENOUVELLEMENT_DNS "False")) '((solution "ProblÃ©me de renouvellement DNS")))
+(create_rule '((equal ACCES_PAR_IP_POSSIBLE "True")) '((solution "Autre problÃ©me DNS")))
 (create_rule '((equal SITE_COURANTS_ACCESSIBLES "False")) '((ask-question RENOUVELLEMENT_DNS "Avez-vous renouveler votre domaine ?")))
-(create_rule '((= PROBLEME_DNS "True")) '((solution "Probléme venant de l'hébergeur de façon probable")))
-(create_rule '((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX)) '((solution "Probléme de configuration NGINX, verifiez vos logs")))
+(create_rule '((= PROBLEME_DNS "True")) '((solution "ProblÃ©me venant de l'hÃ©bergeur de faÃ§on probable")))
+(create_rule '((= ERREUR_NAVIGATEUR 502) (= SERVEUR_APP NGINX)) '((solution "ProblÃ©me de configuration NGINX, verifiez vos logs")))
 (create_rule '((= ERREUR_NAVIGATEUR 500) (= TECHNOLOGIE_APPLICATION "PHP") (= DROITS_FICHIERS "Oui")) 
-	'((solution "Le probléme viens donc de droit de fichier incorrects")))
+	'((solution "Le problÃ©me viens donc de droit de fichier incorrects")))
 (create_rule '((= ERREUR_NAVIGATEUR 500) (= TECHNOLOGIE_APPLICATION "PHP") (= HTACCESS "Oui")) 
-	'((solution "Le probléme viens donc de votre .htaccess")))
+	'((solution "Le problÃ©me viens donc de votre .htaccess")))
 (create_rule '((= ERREUR_NAVIGATEUR 500) (= DEBUG_ACTIF "Oui")) 
-	'((solution "A partir de là, vous devriez désormais pouvoir trouver l'erreur qui à entrainer le probléme")))
-(create_rule '((= ERREUR_NAVIGATEUR 500)) '((solution "Celà semble être un probléme avec votre application web,
+	'((solution "A partir de lÃ , vous devriez dÃ©sormais pouvoir trouver l'erreur qui Ã  entrainer le problÃ©me")))
+(create_rule '((= ERREUR_NAVIGATEUR 500)) '((solution "CelÃ  semble Ãªtre un problÃ©me avec votre application web,
 	cependant nous ne savons pas exactement lequel, verifiez les logs de celle-ci pour en savoir plus")))
 \end{lstlisting}
 
-\section{Moteur d'inférence}
+\section{Moteur d'infÃ©rence}
 
 \subsection{Parcours en profondeur}
 
@@ -184,7 +184,7 @@ DEBUG = True dans settings.py
 \section{Fonctions de service}
 
 \begin{lstlisting}[language=lisp]
-;;Algorithme de recherche de règles candidates
+;;Algorithme de recherche de rÃ¨gles candidates
 (defun search_candidates (facts rules applied &optional out)
 (cond
 ((null rules) (return-from search_candidates out))
@@ -209,7 +209,7 @@ DEBUG = True dans settings.py
 \end{lstlisting}
 
 \begin{lstlisting}[language=lisp]
-;;Algorithme de la fonction de vérification de premises
+;;Algorithme de la fonction de vÃ©rification de premises
 (defun verify_prem (facts premises)
 (dolist (premise premises)
 (cond 
@@ -253,7 +253,7 @@ T
 
 
 \begin{lstlisting}[language=lisp]
-;;Algorithme d'execution des actions induites par l'application des règles
+;;Algorithme d'execution des actions induites par l'application des rÃ¨gles
 (defun execute_action (action facts)
 (case (car action)
 (solution (print (cadr action)) (setq *solutions* (nconc *solutions* (list (cadr action))))
@@ -276,32 +276,32 @@ T
 )
 \end{lstlisting}
 
-Le reste des fonctions n'ayant pas beaucoup d'intérêt algorithmique concernant ce probléme.
+Le reste des fonctions n'ayant pas beaucoup d'intÃ©rÃªt algorithmique concernant ce problÃ©me.
 
 \section{Exemple de fonctionnement}
 
-Probléme DNS
+ProblÃ©me DNS
 \begin{lstlisting}
 Connexion au site possible ? NON
 Affiche une erreur ? OUI
 Quel type d'erreur ? Erreur DNS
-Pouvez-vous accéder à des sites courants tel que google.fr ou apple.com ? OUI
-Avez-vous changer les enregistrements DNS récemment ? OUI
+Pouvez-vous accÃ©der Ã  des sites courants tel que google.fr ou apple.com ? OUI
+Avez-vous changer les enregistrements DNS rÃ©cemment ? OUI
 Il y a combien de temps ? 1h
-Celà semble être un probléme d'enregistrement DNS. Celà prend a plupart du temps plus de 4h à ce répandre sur le réseau.
+CelÃ  semble Ãªtre un problÃ©me d'enregistrement DNS. CelÃ  prend a plupart du temps plus de 4h Ã  ce rÃ©pandre sur le rÃ©seau.
 Souhaitez-vous chercher d'autres solutions ? N
 \end{lstlisting}
 
-Probléme réseau utilisateur
+ProblÃ©me rÃ©seau utilisateur
 \begin{lstlisting}
 Connexion au site possible ? NON
 Affiche une erreur ? OUI
-Pouvez-vous accéder à des sites courants tel que google.fr ou apple.com ? NON
-Le probléme semble être dans votre connexion.
+Pouvez-vous accÃ©der Ã  des sites courants tel que google.fr ou apple.com ? NON
+Le problÃ©me semble Ãªtre dans votre connexion.
 Souhaitez-vous chercher d'autres solutions ? N
 \end{lstlisting}
 
-Probléme de configuration proxy NGINX
+ProblÃ©me de configuration proxy NGINX
 \begin{lstlisting}
 Connexion au site possible ? OUI
 Affiche une erreur (site) ? OUI
@@ -309,15 +309,15 @@ Quel type d'erreur (site) ? 502
 Est-ce que votre site utilise NGINX ? OUI
 Il y a plusieurs solutions possibles:
 * Nginx est en proxy avec Apache et Apache et injoignable (ou un autre serveur web)
-* Configuration du buffer et du timeout insuffisante, essayez ces réglages
-Est-ce que le serveur web derriére NGINX est bien démarré et fonctionnel (verifier les logs) ? OUI
+* Configuration du buffer et du timeout insuffisante, essayez ces rÃ©glages
+Est-ce que le serveur web derriÃ©re NGINX est bien dÃ©marrÃ© et fonctionnel (verifier les logs) ? OUI
 Souhaitez-vous chercher d'autres solutions ? N
 \end{lstlisting}
 
 \chapter*{Conclusion}
 
-En conclusion, la partie la plus difficile de ce TP fut de choisir un sujet applicable aux systéme expert et dont nous avions assez de connaissances pour pouvoir en tirer des informations cohérentes. 
+En conclusion, la partie la plus difficile de ce TP fut de choisir un sujet applicable aux systÃ©me expert et dont nous avions assez de connaissances pour pouvoir en tirer des informations cohÃ©rentes. 
 
-Le systéme expert bien qu'intéressant à été trés difficile à développer de par la difficulté de généraliser nos connaisances ainsi que de couvrir totalement le champs des possibilités sans pour autant poser trop de questions à l'utilisateur.
+Le systÃ©me expert bien qu'intÃ©ressant Ã  Ã©tÃ© trÃ©s difficile Ã  dÃ©velopper de par la difficultÃ© de gÃ©nÃ©raliser nos connaisances ainsi que de couvrir totalement le champs des possibilitÃ©s sans pour autant poser trop de questions Ã  l'utilisateur.
 
 \end{document}
