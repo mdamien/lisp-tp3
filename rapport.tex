@@ -30,7 +30,7 @@
 \DeclareCaptionFormat{listing}{\colorbox{black}{\parbox{\textwidth}{#1#2#3}}}
 \captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
 
-\title{\textsc{\textbf{Rapport TP n°3 IA01}}}
+\title{\textsc{\textbf{Rapport TP n°3 IA01 \\ Diagnostic de panne de site}}}
 \author{\textbf{Damien MARI\'E et Antoine POUILLAUDE}}
 
 \begin{document}
@@ -40,8 +40,52 @@
 \section*{Remarques générales}
 		Ce TP, bien que difficile, nous à ammener à implémenter des fonctions avancées en LISP et des moteurs généralistes de résolution de systéme expert 0+. Le plus difficile ayant été de trouver le sujet sur lequel nous avons appliquer notre systéme expert.
 
-\input{"chapter1.tex"}
-\input{"chapter2.tex"}
-\input{"chapter3.tex"}
+\chapter{Formalisation}  
+
+Afin de développer un systéme expert d'odre 0+, il nous faut pour celà une formalisation de la base de faits, de la base de régles et de la méthode d'inférence utilisée pour le parcours en largeur comme en profondeur.
+
+ \section{Base de régles}
+
+Chaque régle est représentée par: Un identifiant, des premisses et des actions.
+
+\begin{lstlisting}
+( id
+	( ( premisse1) (premisse2) ...)
+	( ( action1) (action2) ...)
+)
+\end{lstlisting}
+
+Chaque prémisse étant constitué d'un opérateur de comparaison et de deux valeurs:
+
+\begin{lstlisting}
+( operateur valeur1 valeur2 valeur3 ...)
+\end{lstlisting}
+
+Exemple d'opérateur: =, <, >
+
+De même les actions sont définis par un opérateur et des valeurs:
+\begin{lstlisting}
+( operateur valeur1 valeur2 valeur3 ...)
+\end{lstlisting}
+
+Exemple d'opérateur: set, print-message, ask
+
+ \section{Base de faits}
+
+De façon beaucoup plus simple, chaque fait est représenté par
+
+<<voir code d'Antoine -- a faire>>
+
+ \section{Fonctionnement du moteur}
+
+L'inférence peut être faite en profondeur ou en largeur, en voici les algorithme simplifés
+
+
+\chapter{Application: Diagnostic de panne de site}
+ \section{Choix du systéme expert}
+
+Pour ce TP, nous avons décidé d'implémenter un systéme expert capable de trouver la cause et la solution à une panne informatique. Celà
+
+ \chapter{Comparaison des moteurs}
                 
 \end{document}
